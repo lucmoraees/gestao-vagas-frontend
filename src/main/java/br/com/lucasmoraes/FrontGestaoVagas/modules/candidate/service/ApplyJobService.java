@@ -1,32 +1,29 @@
 package br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.service;
 
+import br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.dto.TokenDTO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.dto.TokenDTO;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
-public class CandidateService {
-
-    public TokenDTO login(String username, String password) {
+public class ApplyJobService {
+    public String execute(String token, UUID jobId) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token);
 
-        Map<String, String> data = new HashMap<>();
-        data.put("username", username);
-        data.put("password", password);
+        HttpEntity<UUID> request = new HttpEntity<>(jobId, headers);
 
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(data, headers);
-
-        var url = "http://localhost:8080/candidate/auth";
-        var result = restTemplate.postForObject(url, request, TokenDTO.class);
+        var url = "http://localhost:8080/candidate/job/apply";
+        var result = restTemplate.postForObject(url, request, String.class);
 
         return result;
     }
