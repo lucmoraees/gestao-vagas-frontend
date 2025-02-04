@@ -1,9 +1,8 @@
 package br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.controller;
 
-import br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.service.ApplyJobService;
-import br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.service.CandidateService;
-import br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.service.FindJobService;
-import br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.service.ProfileCandidateService;
+import br.com.lucasmoraes.FrontGestaoVagas.Utils.FormatErrorMessage;
+import br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.dto.CreateCandidateDTO;
+import br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,6 +37,9 @@ public class CandidateController {
 
     @Autowired
     private ApplyJobService applyJobService;
+
+    @Autowired
+    private CreateCandidateService createCandidateService;
 
     @GetMapping("/login")
     public String login() {
@@ -116,5 +118,29 @@ public class CandidateController {
         } catch (HttpClientErrorException.Unauthorized ex) {
             return "redirect:candidate/login";
         }
+    }
+
+    @GetMapping("/create")
+    public String create(Model model){
+        model.addAttribute("candidate", new CreateCandidateDTO());
+        return "candidate/create";
+    }
+
+    @PostMapping("/create")
+    public String save(CreateCandidateDTO candidate, Model model){
+
+        try{
+            this.createCandidateService.execute(candidate);
+        } catch(HttpClientErrorException ex){
+            model.addAttribute("error_message", FormatErrorMessage.formatErrorMessage(ex.getResponseBodyAsString()));
+        }
+
+        model.addAttribute("candidate", candidate);
+        return "candidate/create";
+    }
+
+    private String getToken(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getDetails().toString();
     }
 }
