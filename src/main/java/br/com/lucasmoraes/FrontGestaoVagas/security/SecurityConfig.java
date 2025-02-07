@@ -12,12 +12,12 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers("/candidate/login").permitAll()
-                .requestMatchers("/candidate/create").permitAll()
+            auth.requestMatchers("/candidate/create").permitAll()
+                .requestMatchers("/candidate/login").permitAll()
                 .requestMatchers("/candidate/signIn").permitAll()
                 .requestMatchers("/company/create").permitAll()
                 .requestMatchers("/company/login").permitAll()
-                .requestMatchers("/candidate/signIn").permitAll();
+                .requestMatchers("/company/signIn").permitAll();
             auth.anyRequest().authenticated();
         })
                 .formLogin(form -> form.loginPage("/candidate/login"));

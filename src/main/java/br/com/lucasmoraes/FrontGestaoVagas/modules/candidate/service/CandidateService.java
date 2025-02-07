@@ -1,5 +1,6 @@
 package br.com.lucasmoraes.FrontGestaoVagas.modules.candidate.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -12,6 +13,8 @@ import java.util.Map;
 
 @Service
 public class CandidateService {
+    @Value("host.api.gestao.vagas")
+    private String HOST_API_GESTAO_VAGAS;
 
     public TokenDTO login(String username, String password) {
         RestTemplate restTemplate = new RestTemplate();
@@ -25,7 +28,7 @@ public class CandidateService {
 
         HttpEntity<Map<String, String>> request = new HttpEntity<>(data, headers);
 
-        var url = "http://localhost:8080/candidate/auth";
+        var url = HOST_API_GESTAO_VAGAS.concat("/candidate/auth");
         var result = restTemplate.postForObject(url, request, TokenDTO.class);
 
         return result;

@@ -2,11 +2,16 @@ package br.com.lucasmoraes.FrontGestaoVagas.modules.company.controller;
 
 import br.com.lucasmoraes.FrontGestaoVagas.Utils.FormatErrorMessage;
 import br.com.lucasmoraes.FrontGestaoVagas.modules.company.dto.CreateCompanyDTO;
+import br.com.lucasmoraes.FrontGestaoVagas.modules.company.dto.CreateJobsDTO;
 import br.com.lucasmoraes.FrontGestaoVagas.modules.company.service.CreateCompanyService;
+import br.com.lucasmoraes.FrontGestaoVagas.modules.company.service.CreateJobService;
+import br.com.lucasmoraes.FrontGestaoVagas.modules.company.service.ListAllJobsCompanyService;
 import br.com.lucasmoraes.FrontGestaoVagas.modules.company.service.LoginCompanyService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +31,12 @@ public class CompanyController {
 
     @Autowired
     private LoginCompanyService loginCompanyService;
+
+    @Autowired
+    private CreateJobService createJobService;
+
+    @Autowired
+    private ListAllJobsCompanyService listAllJobsCompanyService;
 
     @GetMapping("/create")
     public String create(Model model) {
@@ -69,5 +80,34 @@ public class CompanyController {
             redirectAttributes.addFlashAttribute("error_message", "Usuário/Senha incorretos");
             return "redirect:/company/jobs";
         }
+    }
+
+    @PostMapping("/jobs")
+    @PreAuthorize("hasRole('COMPANY')")
+    public String createJobs(CreateJobsDTO jobs){
+        var result = this.createJobService.execute(jobs, getToken());
+        return "redirect:/company/jobs/list";
+    }
+
+    @GetMapping("/jobs/list")
+    @PreAuthorize("hasRole('COMPANY')")
+    public String listJobs(Model model){
+        model.addAttribute("jobs", new CreateJobsDTO());
+        var result = this.listAllJobsCompanyService.execute(getToken());
+        return "company/jobs";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session){
+        SecurityContextHolder.getContext().setAuthentication(null);
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+        session.setAttribute("token", null);
+        return "redirect:/company/login";
+    }
+
+    private String getToken(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getDetails().toString();
     }
 }
